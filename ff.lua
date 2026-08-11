@@ -13,10 +13,9 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "user" }),
+    Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" }),
     Combat = Window:AddTab({ Title = "Combat", Icon = "sword" }),
     Movement = Window:AddTab({ Title = "Movement", Icon = "activity" }),
-    Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" }),
     Lighting = Window:AddTab({ Title = "Lighting", Icon = "sun" }),
     Performance = Window:AddTab({ Title = "Performance", Icon = "zap" }),
     Teleports = Window:AddTab({ Title = "Teleports", Icon = "map-pin" }),
@@ -352,7 +351,7 @@ RunService.RenderStepped:Connect(function()
                             if cornersEspEnabled then
                                 if not cornerDrawings[player] then
                                     local lines = {}
-                                    for i = 1, 16 do -- 4 линии на каждый угол (всего 4 угла)
+                                    for i = 1, 16 do
                                         local l = Drawing.new("Line")
                                         l.Thickness = 1.5
                                         l.Color = currentEnemyEspColor
@@ -374,24 +373,17 @@ RunService.RenderStepped:Connect(function()
                                     idx = idx + 1
                                 end
                                 
-                                -- Верхний левый угол
                                 makeCorner(x, y, x + len, y)
                                 makeCorner(x, y, x, y + hLen)
-                                
-                                -- Верхний правый угол
                                 makeCorner(x + width, y, x + width - len, y)
                                 makeCorner(x + width, y, x + width, y + hLen)
-                                
-                                -- Нижний левый угол
                                 makeCorner(x, y + height, x + len, y + height)
                                 makeCorner(x, y + height, x, y + height - hLen)
-                                
-                                -- Нижний правый угол
                                 makeCorner(x + width, y + height, x + width - len, y + height)
                                 makeCorner(x + width, y + height, x + width, y + height - hLen)
                             end
                             
-                            -- Отрисовка HP Bar (Полоска здоровья)
+                            -- Отрисовка HP Bar
                             if hpBarEspEnabled then
                                 if not hpBarDrawings[player] then
                                     hpBarDrawings[player] = {
@@ -592,35 +584,35 @@ end
 
 -- === НАПОЛНЕНИЕ ВКЛАДОК ===
 
--- Main Tab
-Tabs.Main:AddParagraph({ Title = "ESP Settings", Content = "Настройка визуального подсвета игроков" })
+-- Visuals Tab (Бывший Main)
+Tabs.Visuals:AddParagraph({ Title = "ESP Settings", Content = "Настройка визуального подсвета игроков" })
 
-Tabs.Main:AddToggle("EspToggle", { Title = "Player Chams (ESP)", Default = false }):OnChanged(function(state)
+Tabs.Visuals:AddToggle("EspToggle", { Title = "Player Chams (ESP)", Default = false }):OnChanged(function(state)
     espEnabled = state
     refreshEsp()
 end)
 
-Tabs.Main:AddToggle("CornersToggle", { Title = "ESP Corners", Default = false }):OnChanged(function(state)
+Tabs.Visuals:AddToggle("CornersToggle", { Title = "ESP Corners", Default = false }):OnChanged(function(state)
     cornersEspEnabled = state
     if not state then removeCornersAndHp() end
 end)
 
-Tabs.Main:AddToggle("HpBarToggle", { Title = "ESP HP Bar", Default = false }):OnChanged(function(state)
+Tabs.Visuals:AddToggle("HpBarToggle", { Title = "ESP HP Bar", Default = false }):OnChanged(function(state)
     hpBarEspEnabled = state
     if not state then removeCornersAndHp() end
 end)
 
-Tabs.Main:AddToggle("SelfEspToggle", { Title = "Include Self", Default = false }):OnChanged(function(state)
+Tabs.Visuals:AddToggle("SelfEspToggle", { Title = "Include Self", Default = false }):OnChanged(function(state)
     includeSelfEnabled = state
     refreshEsp()
 end)
 
-Tabs.Main:AddToggle("TeamCheckToggle", { Title = "Team Check", Default = false }):OnChanged(function(state)
+Tabs.Visuals:AddToggle("TeamCheckToggle", { Title = "Team Check", Default = false }):OnChanged(function(state)
     teamCheckEnabled = state
     refreshEsp()
 end)
 
-Tabs.Main:AddToggle("NameTagsToggle", { Title = "NameTags & Distance", Default = false }):OnChanged(function(state)
+Tabs.Visuals:AddToggle("NameTagsToggle", { Title = "NameTags & Distance", Default = false }):OnChanged(function(state)
     if state then
         for _, p in ipairs(Players:GetPlayers()) do addNameTag(p) end
     else
@@ -628,22 +620,60 @@ Tabs.Main:AddToggle("NameTagsToggle", { Title = "NameTags & Distance", Default =
     end
 end)
 
-Tabs.Main:AddColorpicker("EnemyColorPicker", { Title = "Enemy Color", Default = Color3.fromRGB(255, 50, 50) }):OnChanged(function(color)
+Tabs.Visuals:AddColorpicker("EnemyColorPicker", { Title = "Enemy Color", Default = Color3.fromRGB(255, 50, 50) }):OnChanged(function(color)
     currentEnemyEspColor = color
     updateEspColors()
 end)
 
-Tabs.Main:AddSlider("FillTransparencySlider", { Title = "Fill Transparency", Default = 0.2, Min = 0, Max = 1, Rounding = 1 }):OnChanged(function(value)
+Tabs.Visuals:AddSlider("FillTransparencySlider", { Title = "Fill Transparency", Default = 0.2, Min = 0, Max = 1, Rounding = 1 }):OnChanged(function(value)
     fillTransparencyVal = value
     updateEspColors()
 end)
 
-Tabs.Main:AddToggle("AntiAfkToggle", { Title = "Anti-AFK Protection", Default = false }):OnChanged(function(state)
-    antiAfkEnabled = state
+Tabs.Visuals:AddToggle("FovChangerToggle", { Title = "FOV Changer", Default = false }):OnChanged(function(state)
+    fovChangerEnabled = state
+    if not state then Camera.FieldOfView = originalCameraFov end
+end)
+
+Tabs.Visuals:AddSlider("CameraFovSlider", { Title = "Camera FOV", Default = 70, Min = 30, Max = 120, Rounding = 0 }):OnChanged(function(value)
+    customFovValue = value
+end)
+
+Tabs.Visuals:AddToggle("OrbsToggle", { Title = "Flying Orbs", Default = false }):OnChanged(function(state)
+    flyingOrbsEnabled = state
+    updateOrbs()
+end)
+
+Tabs.Visuals:AddDropdown("OrbShapeDropdown", { Title = "Orb Shape", Values = { "Ball", "BoxWire" }, Default = 1 }):OnChanged(function(val)
+    orbShapeType = val
+    if flyingOrbsEnabled then updateOrbs() end
+end)
+
+Tabs.Visuals:AddColorpicker("OrbColorPicker", { Title = "Orb Color", Default = Color3.fromRGB(0, 255, 200) }):OnChanged(function(color)
+    currentOrbColor = color
+    if flyingOrbsEnabled then
+        for _, orbData in ipairs(activeOrbs) do
+            if orbData.Part then
+                orbData.Part.Color = currentOrbColor
+                local sb = orbData.Part:FindFirstChild("SelectionBox")
+                if sb then sb.Color3 = currentOrbColor end
+            end
+        end
+    end
+end)
+
+Tabs.Visuals:AddSlider("OrbSizeSlider", { Title = "Orb Size", Default = 3, Min = 1, Max = 10, Rounding = 1 }):OnChanged(function(value)
+    orbSize = value
+    if flyingOrbsEnabled then updateOrbs() end
+end)
+
+Tabs.Visuals:AddSlider("OrbCountSlider", { Title = "Orb Count", Default = 20, Min = 5, Max = 100, Rounding = 0 }):OnChanged(function(value)
+    orbCount = value
+    if flyingOrbsEnabled then updateOrbs() end
 end)
 
 
--- Combat Tab
+-- Combat Tab (Только чистый бой и спинботы)
 Tabs.Combat:AddToggle("AimbotToggle", { Title = "Aimbot (Hold Q)", Default = false }):OnChanged(function(state)
     aimbotEnabled = state
 end)
@@ -705,50 +735,6 @@ Tabs.Movement:AddToggle("NoclipToggle", { Title = "NoClip (Walls)", Default = fa
 end)
 
 
--- Visuals Tab
-Tabs.Visuals:AddToggle("FovChangerToggle", { Title = "FOV Changer", Default = false }):OnChanged(function(state)
-    fovChangerEnabled = state
-    if not state then Camera.FieldOfView = originalCameraFov end
-end)
-
-Tabs.Visuals:AddSlider("CameraFovSlider", { Title = "Camera FOV", Default = 70, Min = 30, Max = 120, Rounding = 0 }):OnChanged(function(value)
-    customFovValue = value
-end)
-
-Tabs.Visuals:AddToggle("OrbsToggle", { Title = "Flying Orbs", Default = false }):OnChanged(function(state)
-    flyingOrbsEnabled = state
-    updateOrbs()
-end)
-
-Tabs.Visuals:AddDropdown("OrbShapeDropdown", { Title = "Orb Shape", Values = { "Ball", "BoxWire" }, Default = 1 }):OnChanged(function(val)
-    orbShapeType = val
-    if flyingOrbsEnabled then updateOrbs() end
-end)
-
-Tabs.Visuals:AddColorpicker("OrbColorPicker", { Title = "Orb Color", Default = Color3.fromRGB(0, 255, 200) }):OnChanged(function(color)
-    currentOrbColor = color
-    if flyingOrbsEnabled then
-        for _, orbData in ipairs(activeOrbs) do
-            if orbData.Part then
-                orbData.Part.Color = currentOrbColor
-                local sb = orbData.Part:FindFirstChild("SelectionBox")
-                if sb then sb.Color3 = currentOrbColor end
-            end
-        end
-    end
-end)
-
-Tabs.Visuals:AddSlider("OrbSizeSlider", { Title = "Orb Size", Default = 3, Min = 1, Max = 10, Rounding = 1 }):OnChanged(function(value)
-    orbSize = value
-    if flyingOrbsEnabled then updateOrbs() end
-end)
-
-Tabs.Visuals:AddSlider("OrbCountSlider", { Title = "Orb Count", Default = 20, Min = 5, Max = 100, Rounding = 0 }):OnChanged(function(value)
-    orbCount = value
-    if flyingOrbsEnabled then updateOrbs() end
-end)
-
-
 -- Lighting Tab
 Tabs.Lighting:AddParagraph({ Title = "Lighting Settings", Content = "Настройка освещения в игре" })
 
@@ -787,8 +773,6 @@ Tabs.Performance:AddButton({
 
 
 -- Teleports Tab
-Tabs.Teleports:AddParagraph({ Title = "Teleportation", Content = "Инструменты для быстрого перемещения" })
-
 local function getPlayerNames()
     local list = {}
     for _, p in ipairs(Players:GetPlayers()) do
@@ -867,7 +851,11 @@ Tabs.World:AddSlider("TimeSlider", { Title = "Time Changer (ClockTime)", Default
 end)
 
 
--- Scripts Tab
+-- Scripts Tab (Теперь тут и Anti-AFK)
+Tabs.Scripts:AddToggle("AntiAfkToggle", { Title = "Anti-AFK Protection", Default = false }):OnChanged(function(state)
+    antiAfkEnabled = state
+end)
+
 Tabs.Scripts:AddInput("SpamInput", { Title = "Spam Text", Default = "привет всем от flam hub!", Placeholder = "Введите текст..." }):OnChanged(function(text)
     if text ~= "" then spamText = text end
 end)
@@ -906,7 +894,7 @@ InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
 Window:SelectTab(1)
-Fluent:Notify({ Title = "Flam Hub", Content = "Скрипт обновлен!", Duration = 5 })
+Fluent:Notify({ Title = "Flam Hub", Content = "Структура вкладок обновлена!", Duration = 5 })
 
 Fluent.Unloaded = function()
     removeEsp()
